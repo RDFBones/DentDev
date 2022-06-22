@@ -1,6 +1,65 @@
 #! /bin/bash
 
-## BUILD CORE ONTOLOGY
+## DEFINE OPTIONS
+
+update=0
+build=0
+
+function usage {
+    echo " "
+    echo "usage: $0 [-b][-u]"
+    echo " "
+    echo "    -b          build owl file"
+    echo "    -u          initalize/update submodule"
+    echo "    -h -?       print this help"
+    echo " "
+    
+    exit
+}
+
+while getopts "bcuh?" opt; do
+    case "$opt" in
+	
+	u)  update=1
+	    ;;
+	b) build=1
+	   ;;       
+	?)
+	usage
+	;;
+	h)
+	    usage
+	    ;;
+    esac
+done
+if [ -z "$1" ]; then
+    usage
+fi
+
+## PREPARE SUBMODULES
+
+## Check if submodules are initialised
+
+gitchk=$(git submodule foreach 'echo $sm_path `git rev-parse HEAD`')
+if [ -z "$gitchk" ];then
+    update=1
+    echo "Initializing git submodule"
+fi
+
+## Initialise and update git submodules
+
+if  [ $update -eq 1 ]; then
+    git submodule init
+    git submodule update
+fi
+
+
+if [ $build -eq 1 ]; then # Starts build process
+
+    
+## BUILD DEPENDENCIES
+
+## Build Core Ontology
 
 cd RDFBones-O/robot
 
@@ -38,3 +97,5 @@ robot annotate --input results/dentdev.owl \
 robot reason --reasoner ELK \
       --input results/dentdev.owl \
       -D results/debug.owl
+
+fi # Ends build process
